@@ -1,0 +1,15 @@
+<xml>
+   <set name="static_link" value="1" />
+   <include name="${HXCPP}/toolchain/haxe-target.xml" />
+
+   <files id="detect-files"  >
+      <compilerflag value="-I../configs" />
+      <compilerflag value="-I.." />
+      <file name="../src/H5detect.c" />
+   </files>
+
+   <target id="default" tool="linker" toolid="exe" output="obj/detect" >
+      <files id="detect-files" />
+   </target>
+
+</xml>

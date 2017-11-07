@@ -1,0 +1,14 @@
+<xml>
+   <set name="static_link" value="1" />
+   <include name="${HXCPP}/toolchain/haxe-target.xml" />
+
+   <files id="settings-files"  >
+      <compilerflag value="-I../configs" />
+      <file name="../src/H5make_libsettings.c" />
+   </files>
+
+   <target id="default" tool="linker" toolid="exe" output="obj/settings" >
+      <files id="settings-files" />
+   </target>
+
+</xml>
