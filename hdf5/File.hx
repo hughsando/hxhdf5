@@ -1,14 +1,13 @@
 package hdf5;
 
-class File implements DatasetContainer
+class File extends Group
 {
-   var handle:Dynamic;
-
-   function new(inHandle:Dynamic) handle = inHandle;
+   function new(inHandle:Dynamic) super(inHandle);
 
    public function close()
    {
-      fileClose(handle);
+      if (handle!=null)
+         fileClose(handle);
       handle = null;
    }
 
@@ -25,6 +24,6 @@ class File implements DatasetContainer
 
    static var fileClose = Loader.load("fileClose","ov");
    static var fileOpen = Loader.load("fileOpen","sbo");
-   static var fileCreate = Loader.load("fileOpen","sbo");
+   static var fileCreate = Loader.load("fileCreate","sbo");
 }
 
