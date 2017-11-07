@@ -1,6 +1,5 @@
 <xml>
-   <set name="static_link" value="1" />
-   <set name="CUDA_SDK" value="${CUDA_PATH}" if="CUDA_PATH" unless="CUDA_SDK" />
+   <!-- <set name="static_link" value="1" /> -->
    <include name="${HXCPP}/toolchain/haxe-target.xml" />
 
 
@@ -302,9 +301,12 @@
    <file name="src/H5dbg.c" />
    <file name="src/H5checksum.c" />
    <file name="src/H5.c" />
+
+   <file name="api/Api.cpp" />
+
    </files>
 
-   <target id="default" tool="linker" toolid="dll" output="hd5" >
+   <target id="default" tool="linker" toolid="dll" output="hxhdf5" >
       <files id="hdf5" />
       <outdir name="../ndll/${BINDIR}" />
       <ext value=".ndll" />
