@@ -145,7 +145,7 @@ H5O_assert(const H5O_t *oh)
             HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);
         else if(chunk0_size <= 65535)
             HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_2);
-        else if(chunk0_size <= 4294967295)
+        else if(chunk0_size <= (unsigned int)4294967295)
             HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_4);
         else
             HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_8);

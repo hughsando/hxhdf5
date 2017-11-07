@@ -300,7 +300,7 @@ H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
     *p++ = H5O_LINK_VERSION;
 
     /* The encoding flags for the link */
-    if(len > 4294967295)
+    if(len > (unsigned int)4294967295)
         link_flags = H5O_LINK_NAME_8;
     else if(len > 65535)
         link_flags = H5O_LINK_NAME_4;

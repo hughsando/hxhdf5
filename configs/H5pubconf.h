@@ -17,8 +17,13 @@
   #define H5_HAVE_WIN32_API 1
   #define H5_HAVE_SYS_TIME 1
   #define H5_HAVE_WINSOCK2_H 1
+   /* Define if C++ compiler recognizes offsetof */
+  #define CXX_HAVE_OFFSETOF
 #else
   #define H5_TIME_WITH_SYS_TIME 1
+  #define H5_HAVE_DLFCN_H 1
+  #define H5_HAVE_DIRENT_H 1
+  #define H5_HAVE_FLOCK 1
 #endif
 
 //#define H5_HAVE_FCNTL
@@ -176,8 +181,6 @@
 
 
 
-/* Define if C++ compiler recognizes offsetof */
-#define CXX_HAVE_OFFSETOF
 
 #undef DEBUG_BUILD
 

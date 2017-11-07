@@ -648,7 +648,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
         oh_dst->flags = (uint8_t)(oh_dst->flags & ~H5O_HDR_CHUNK0_SIZE);
 
         /* Determine correct value for chunk #0 size bits */
-        if(dst_oh_size > 4294967295)
+        if(dst_oh_size > (unsigned int)4294967295)
             oh_dst->flags |= H5O_HDR_CHUNK0_8;
         else if(dst_oh_size > 65535)
             oh_dst->flags |= H5O_HDR_CHUNK0_4;
