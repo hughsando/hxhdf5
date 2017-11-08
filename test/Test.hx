@@ -15,7 +15,7 @@ class Test
      }
      else
      {
-        var file = hdf5.File.open(args[0]);
+        var file = hdf5.File.open(arg);
 
         for(i in 0...file.itemCount)
            trace(file.getItem(i));
@@ -27,6 +27,11 @@ class Test
               case DatasetItem(i): Sys.println("Found data " + i);
               default:
            }
+        }
+
+        if (args[0]!=null)
+        {
+           trace(file.getAttributes(args[0]));
         }
 
         file.close();

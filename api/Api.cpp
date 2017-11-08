@@ -1,8 +1,12 @@
+#include "hdf5.h"
+#include "H5public.h"
+#include "h5tools.h"
+
 #define IMPLEMENT_API
 #include <hx/CffiPrime.h>
 #include <vector>
 #include <string>
-#include "hdf5.h"
+#include <algorithm>
 
 
 vkind fileKind;
@@ -241,6 +245,79 @@ value groupGetItemAt(value inGroup,int inIdx)
 DEFINE_PRIME2(groupGetItemAt)
 
 
+herr_t h5GetAttrs(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
+{
+   value result = (value)op_data;
+   printf("attrib %s.\n", attr_name);
+
+   hid_t               attr = -1;
+
+   if((attr = H5Aopen(location_id, attr_name, H5P_DEFAULT)))
+   {
+      hid_t type = H5Aget_type(attr);
+      hid_t space = H5Aget_space(attr);
+      hid_t p_type = h5tools_get_native_type(type);
+
+      int cls = H5Tget_class(type);
+
+      hsize_t     size[64];
+      hsize_t     nelmts = 1;
+      int ndims = H5Sget_simple_extent_dims(space, size, NULL);
+      for(int i = 0; i < ndims; i++)
+         nelmts *= size[i];
+      #undef max
+      hsize_t alloc_size = nelmts * std::max(H5Tget_size(type), H5Tget_size(p_type));
+
+      if (cls==H5T_INTEGER &&  H5Tget_size(type) == 1 )
+         printf("  -> char string\n");
+      else
+         switch(cls)
+         {
+            case H5T_INTEGER:
+               printf("  ->int\n");
+               break;
+            case H5T_FLOAT:
+               printf("  ->int\n");
+               break;
+            case H5T_TIME:
+               printf("  ->time\n");
+               break;
+            case H5T_STRING:
+               {
+               char *ptr = 0;
+               H5Aread(attr, p_type, &ptr);
+               printf("  ->%s\n", ptr);
+               }
+               break;
+            default:
+               printf("  ->unknown\n");
+               break;
+         }
+
+      H5Tclose(p_type);
+      H5Sclose(space);
+      H5Tclose(type);
+      H5Aclose(attr);
+   }
+
+   return 0;
+}
+
+value groupGetAttributes(value inGroup, HxString path)
+{
+   TO_GROUP
+
+   value result = alloc_empty_object();
+
+   hsize_t idx = 0;
+   H5Aiterate_by_name(group, path.c_str(), H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, &idx,
+       h5GetAttrs, (void *)result, H5P_DEFAULT);
+
+   CheckError();
+
+   return result;
+}
+DEFINE_PRIME2(groupGetAttributes)
 
 
 

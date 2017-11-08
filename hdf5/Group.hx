@@ -10,6 +10,11 @@ class Group
 
    function new(inHandle:Dynamic) handle = inHandle;
 
+   public function getAttributes(path:String = "."):Dynamic
+   {
+      return groupGetAttributes(handle,path);
+   }
+
    public function getItemsRecurse() : Array<Item>
    {
       var vals:Array<Dynamic> = groupGetAllChildren(handle);
@@ -45,5 +50,6 @@ class Group
    static var groupGetItemAt = Loader.load("groupGetItemAt","oio");
    static var groupGetItemCount = Loader.load("groupGetItemCount","oi");
    static var groupGetAllChildren = Loader.load("groupGetAllChildren","oo");
+   static var groupGetAttributes = Loader.load("groupGetAttributes","oso");
 }
 

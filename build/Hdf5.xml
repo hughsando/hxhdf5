@@ -7,6 +7,7 @@
      <compilerflag value="-I../configs" />
      <compilerflag value="-I.." />
      <compilerflag value="-I../src" />
+     <compilerflag value="-I../tools/lib" />
 
    <file name="src/H5Ztrans.c" />
    <file name="src/H5Zszip.c" />
