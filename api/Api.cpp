@@ -99,6 +99,25 @@ void CheckError()
    }
 }
 
+// ------ Tools -----------------------
+
+extern "C" { int h5dump_main(int argc, const void *); }
+
+int h5DumpMain(value inCommands)
+{
+   int commandCount = val_is_null(inCommands) ? 0 :  val_array_size(inCommands);
+   std::vector<const char *> args(commandCount+2);
+   args[0] = "h5dump";
+   for(int i=0;i<commandCount;i++)
+      args[i+1] = val_string( val_array_i(inCommands,i) );
+   args[commandCount+1] = 0;
+
+   typedef const char *Arg_t[];
+
+   return h5dump_main( commandCount+1, &args[0] );
+}
+DEFINE_PRIME1(h5DumpMain)
+
 
 
 // ------ File -----------------------

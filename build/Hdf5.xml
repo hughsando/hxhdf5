@@ -306,8 +306,29 @@
 
    </files>
 
+   <files id="h5dump" >
+     <compilerflag value="-I../configs" />
+     <compilerflag value="-I.." />
+     <compilerflag value="-I../src" />
+     <compilerflag value="-I../tools/h5dump" />
+     <compilerflag value="-I../tools/lib" />
+
+     <file name="../tools/h5dump/h5dump_xml.c" />
+     <file name="../tools/h5dump/h5dump_ddl.c" />
+     <file name="../tools/h5dump/h5dump.c" />
+
+     <file name="../tools/lib/h5tools_type.c" />
+     <file name="../tools/lib/h5tools_ref.c" />
+     <file name="../tools/lib/h5tools_utils.c" />
+     <file name="../tools/lib/h5tools_str.c" />
+     <file name="../tools/lib/h5tools_dump.c" />
+     <file name="../tools/lib/h5tools.c" />
+     <file name="../tools/lib/h5trav.c" />
+   </files>
+
    <target id="default" tool="linker" toolid="dll" output="hxhdf5" >
       <files id="hdf5" />
+      <files id="h5dump" />
       <outdir name="../ndll/${BINDIR}" />
       <ext value=".ndll" />
    </target>
