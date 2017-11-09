@@ -11,8 +11,29 @@
 
 vkind fileKind;
 vkind dataKind;
+vkind datasetKind;
 vkind groupKind;
 
+enum DataType
+{
+   SignedInteger   = 0x01000000,
+   UnsignedInteger = 0x02000000,
+   Floating        = 0x04000000,
+   AsciiString     = 0x08000000,
+
+   BitsMask        = 0x00ffffff,
+
+   Float32        = Floating | 32,
+   Float64        = Floating | 64,
+   UInt8          = UnsignedInteger | 8,
+   UInt16         = UnsignedInteger | 16,
+   UInt32         = UnsignedInteger | 32,
+   UInt64         = UnsignedInteger | 64,
+   Int8           = SignedInteger | 8,
+   Int16          = SignedInteger | 16,
+   Int32          = SignedInteger | 32,
+   Int64          = SignedInteger | 64,
+};
 
 std::string h5LastError;
 
@@ -37,6 +58,7 @@ extern "C" void InitIDs()
    kind_share(&fileKind,"h5File");
    kind_share(&dataKind,"data");
    kind_share(&groupKind,"h5Group");
+   kind_share(&datasetKind,"h5Dataset");
 
    _id_name = val_id("name");
    _id_type = val_id("type");
@@ -166,9 +188,11 @@ void fileClose(value inFile)
    if (file>=0)
    {
       H5Fclose(file);
+      ClearGc(inFile);
       CheckError();
    }
-   ClearGc(inFile);
+   else
+      ClearGc(inFile);
 }
 DEFINE_PRIME1v(fileClose)
 
@@ -248,8 +272,6 @@ DEFINE_PRIME2(groupGetItemAt)
 herr_t h5GetAttrs(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
 {
    value result = (value)op_data;
-   printf("attrib %s.\n", attr_name);
-
    hid_t               attr = -1;
 
    if((attr = H5Aopen(location_id, attr_name, H5P_DEFAULT)))
@@ -268,29 +290,41 @@ herr_t h5GetAttrs(hid_t location_id, const char *attr_name, const H5A_info_t *ai
       #undef max
       hsize_t alloc_size = nelmts * std::max(H5Tget_size(type), H5Tget_size(p_type));
 
+      /*
       if (cls==H5T_INTEGER &&  H5Tget_size(type) == 1 )
          printf("  -> char string\n");
       else
+      */
          switch(cls)
          {
             case H5T_INTEGER:
-               printf("  ->int\n");
+               {
+               int value = 0;
+               H5Aread(attr, p_type, &value);
+               alloc_field(result, val_id(attr_name), alloc_int(value) );
+               }
                break;
             case H5T_FLOAT:
-               printf("  ->int\n");
-               break;
-            case H5T_TIME:
-               printf("  ->time\n");
+               {
+               double value = 0;
+               H5Aread(attr, H5T_NATIVE_DOUBLE, &value);
+               alloc_field(result, val_id(attr_name), alloc_float(value) );
+               }
                break;
             case H5T_STRING:
                {
                char *ptr = 0;
                H5Aread(attr, p_type, &ptr);
-               printf("  ->%s\n", ptr);
+               alloc_field(result, val_id(attr_name), alloc_string(ptr) );
                }
                break;
+            /*
+            case H5T_TIME:
+               printf("  ->time\n");
+               break;
+            */
             default:
-               printf("  ->unknown\n");
+               //printf("  ->unknown\n");
                break;
          }
 
@@ -320,6 +354,125 @@ value groupGetAttributes(value inGroup, HxString path)
 DEFINE_PRIME2(groupGetAttributes)
 
 
+// --- Dataset ----
+
+#define TO_DATASET \
+   if (val_kind(inDataset)!=datasetKind) val_throw(alloc_string("object not a dataset")); \
+   hid_t dataset = valToId(inDataset);
+
+void destroyDataset(value inDataset)
+{
+   TO_DATASET
+   if (dataset>=0)
+      H5Dclose(dataset);
+   FreeAbstract(inDataset);
+}
 
 
+value groupOpenDataset(value inGroup, HxString path)
+{
+   TO_GROUP
+
+   hid_t dataset = H5Dopen2(group, path.c_str(), H5P_DEFAULT);
+
+   CheckError();
+
+   return idToVal(dataset, datasetKind, destroyDataset);
+}
+
+
+DEFINE_PRIME2(groupOpenDataset)
+
+void datasetClose(value inDataset)
+{
+   TO_DATASET
+
+   if (dataset>=0)
+   {
+      H5Dclose(dataset);
+      ClearGc(inDataset);
+      CheckError();
+   }
+   else
+      ClearGc(inDataset);
+}
+
+DEFINE_PRIME1v(datasetClose)
+
+
+
+
+value datasetGetShape(value inDataset)
+{
+   TO_DATASET
+
+   hid_t type = H5Dget_type(dataset);
+
+   value result = alloc_array(0);
+
+   hid_t space = H5Dget_space(dataset);
+
+   hsize_t     size[64];
+   hsize_t     nelmts = 1;
+
+   int ndims = H5Sget_simple_extent_dims(space, size, NULL);
+   for(int i = 0; i < ndims; i++)
+      val_array_push(result, alloc_int( (int)size[i] ) );
+
+   H5Sclose(space);
+   H5Tclose(type);
+
+   CheckError();
+
+   return result;
+}
+
+DEFINE_PRIME1(datasetGetShape)
+
+
+int datasetGetType(value inDataset)
+{
+   TO_DATASET
+
+   hid_t type = H5Dget_type(dataset);
+
+   int result = 0;
+
+   int cls = H5Tget_class(type);
+
+   switch(cls)
+   {
+      case H5T_INTEGER:
+         {
+            result = H5Tget_sign(type)==H5T_SGN_NONE ? UnsignedInteger : SignedInteger;
+            int sz = H5Tget_size(type);
+            result |= (sz<<3);
+         }
+         break;
+      case H5T_FLOAT:
+         {
+            result = Floating;
+            int sz = H5Tget_size(type);
+            result |= (sz<<3);
+         }
+         break;
+      case H5T_STRING:
+         {
+            result = AsciiString;
+         }
+         break;
+
+      default:
+         //printf("  ->unknown\n");
+         break;
+   }
+
+   H5Tclose(type);
+
+   CheckError();
+
+   return result;
+}
+
+DEFINE_PRIME1(datasetGetType)
 

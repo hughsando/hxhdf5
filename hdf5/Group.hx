@@ -1,12 +1,14 @@
 package hdf5;
 
-import hdf5.Item;
+import hdf5.ItemType;
 
 class Group
 {
    var handle:Dynamic;
 
    public var itemCount(get,null):Int;
+   public var attribs(get,null):Dynamic;
+
 
    function new(inHandle:Dynamic) handle = inHandle;
 
@@ -14,6 +16,8 @@ class Group
    {
       return groupGetAttributes(handle,path);
    }
+
+   function get_attribs() return getAttributes();
 
    public function getItemsRecurse() : Array<Item>
    {
@@ -26,16 +30,22 @@ class Group
 
    function anonToItem(item:Dynamic) : Item
    {
-      return switch(item.type)
+      var type = switch(item.type)
       {
-         case 0: GroupItem(item.name);
-         case 1: DatasetItem(item.name);
-         case 2: TypeItem(item.name);
-         case 3: LinkItem(item.name);
-         case 4: UserLinkItem(item.name);
+         case 0: GroupItem;
+         case 1: DatasetItem;
+         case 2: TypeItem;
+         case 3: LinkItem;
+         case 4: UserLinkItem;
          default:
-            UnknownItem(item.name);
+            UnknownItem;
       }
+      return new Item(this, item.name, type);
+   }
+
+   public function openDataset(inPath:String) : Dataset
+   {
+      return new Dataset(inPath, groupOpenDataset(handle, inPath) );
    }
 
    public function getItem(i:Int) : Item
@@ -51,5 +61,6 @@ class Group
    static var groupGetItemCount = Loader.load("groupGetItemCount","oi");
    static var groupGetAllChildren = Loader.load("groupGetAllChildren","oo");
    static var groupGetAttributes = Loader.load("groupGetAttributes","oso");
+   static var groupOpenDataset = Loader.load("groupOpenDataset","oso");
 }
 

@@ -18,18 +18,32 @@ class Test
         var file = hdf5.File.open(arg);
 
         for(i in 0...file.itemCount)
-           trace(file.getItem(i));
+        {
+           Sys.println("Top level " + file.getItem(i) );
+        }
 
         for(item in file.getItemsRecurse())
         {
-           switch(item)
+           switch(item.type)
            {
-              case DatasetItem(i): Sys.println("Found data " + i);
+              case DatasetItem:
+                 var dataset = item.openDataset();
+                 Sys.println(dataset.name + ":" + dataset.shape + " x " + dataset.typename);
+                 dataset.close();
+
               default:
            }
         }
 
         if (args[0]!=null)
+        {
+           var dataset = file.openDataset(args[0]);
+           Sys.println(dataset.name + ":" + dataset.shape + " x " + dataset.typename);
+           dataset.close();
+        }
+
+
+        if (args[1]!=null)
         {
            trace(file.getAttributes(args[0]));
         }
