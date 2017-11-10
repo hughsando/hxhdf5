@@ -401,6 +401,32 @@ DEFINE_PRIME1v(datasetClose)
 
 
 
+int datasetGetSize(value inDataset)
+{
+   TO_DATASET
+
+   hid_t type = H5Dget_type(dataset);
+
+   hid_t space = H5Dget_space(dataset);
+
+   hsize_t     size[64];
+   hsize_t     nelmts = 1;
+
+   int ndims = H5Sget_simple_extent_dims(space, size, NULL);
+
+   hsize_t result = 1;
+   for(int i = 0; i < ndims; i++)
+      result *= size[i];
+
+   H5Sclose(space);
+   H5Tclose(type);
+
+   CheckError();
+
+   return result;
+}
+DEFINE_PRIME1(datasetGetSize)
+
 
 value datasetGetShape(value inDataset)
 {
@@ -475,4 +501,52 @@ int datasetGetType(value inDataset)
 }
 
 DEFINE_PRIME1(datasetGetType)
+
+hid_t getNativeType(int inDataType)
+{
+   switch(inDataType)
+   {
+      case Float32 : return H5T_NATIVE_FLOAT;
+      case Float64 : return H5T_NATIVE_DOUBLE;
+      case UInt8   : return H5T_NATIVE_UCHAR;
+      case UInt16  : return H5T_NATIVE_USHORT;
+      case UInt32  : return H5T_NATIVE_UINT;
+      case UInt64  : return H5T_NATIVE_UINT64;
+      case Int8    : return H5T_NATIVE_SCHAR;
+      case Int16   : return H5T_NATIVE_SHORT;
+      case Int32   : return H5T_NATIVE_INT;
+      case Int64   : return H5T_NATIVE_INT64;
+   }
+   val_throw( alloc_string("invalid DataType") );
+   return 0;
+}
+
+
+void datasetReadData(value inDataset, int inDataType, value outResult)
+{
+   TO_DATASET
+
+   hid_t target = getNativeType(inDataType);
+
+   CffiBytes buf = getByteData(outResult);
+   void *outBuf = buf.data;
+
+   if (!outBuf)
+      outBuf = val_array_int(outResult);
+   if (!outBuf)
+      outBuf = val_array_float(outResult);
+   if (!outBuf)
+      outBuf = val_array_double(outResult);
+
+   if (!outBuf)
+      val_throw( alloc_string("invalid data target") );
+
+   H5Dread(dataset, target, H5S_ALL, H5S_ALL, H5P_DEFAULT, outBuf );
+
+   CheckError();
+}
+
+DEFINE_PRIME3v(datasetReadData)
+
+
 

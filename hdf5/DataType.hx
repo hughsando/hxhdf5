@@ -37,5 +37,14 @@ class DataType
 
       return "Bad Type";
    }
+
+   public static function size(type:Int):Int
+   {
+      if ( (type & (SignedInteger|UnsignedInteger|Floating)) > 0 )
+         return (type & BitsMask) >> 3;
+
+      return -1;
+   }
+
 }
 

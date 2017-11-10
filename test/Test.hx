@@ -1,3 +1,5 @@
+import hdf5.DataType;
+
 class Test
 {
   public static function main()
@@ -39,6 +41,19 @@ class Test
         {
            var dataset = file.openDataset(args[0]);
            Sys.println(dataset.name + ":" + dataset.shape + " x " + dataset.typename);
+
+           var data = dataset.readData(DataType.Float32);
+           Sys.println("Data size:" + data.length);
+           Sys.print("[ ");
+           for(i in 0...dataset.elementCount)
+              Sys.print(data.getFloat(i<<2) + " ");
+           Sys.println(" ]");
+           #if cpp
+           var floats:Array<cpp.Float32> = cpp.NativeArray.create(dataset.elementCount);
+           dataset.fillData(floats, DataType.Float32);
+           Sys.println("floats = " + floats );
+           #end
+
            dataset.close();
         }
 
