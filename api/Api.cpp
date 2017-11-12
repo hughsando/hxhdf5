@@ -537,6 +537,8 @@ void datasetReadData(value inDataset, int inDataType, value outResult)
       outBuf = val_array_float(outResult);
    if (!outBuf)
       outBuf = val_array_double(outResult);
+   if (!outBuf && val_is_kind(outResult, dataKind))
+      outBuf = val_data(outResult);
 
    if (!outBuf)
       val_throw( alloc_string("invalid data target") );

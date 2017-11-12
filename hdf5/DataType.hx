@@ -8,7 +8,7 @@ class DataType
    public static inline var AsciiString     = 0x08000000;
    public static inline var Boolean         = 0x10000000;
 
-   public static inline var BitsMask        = 0x00ffffff;
+   public static inline var BitsMask        = 0x000000ff;
 
    public static inline var Float32        = Floating | 32;
    public static inline var Float64        = Floating | 64;
