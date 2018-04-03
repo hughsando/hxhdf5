@@ -1,0 +1,7 @@
+configs/gen_*
+*.zip
+build/obj
+ndll/
+test/bin
+test/cpp
+*.swp

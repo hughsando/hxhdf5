@@ -1,0 +1,11 @@
+{
+  "name": "hxhdf5",
+  "url": "https://github.com/hughsando",
+  "license": "MIT",
+  "tags": [ "cpp", "haxe", "hdf5" ],
+  "description": "Haxe build files for hdf5 library",
+  "version": "0.1.0",
+  "releasenote": "Creation",
+  "contributors": [ "gamehaxe" ],
+  "dependencies": {}
+}
