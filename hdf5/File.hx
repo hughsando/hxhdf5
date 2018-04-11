@@ -16,6 +16,11 @@ class File extends Group
       return new File( fileOpen(inFilename, inReadOnly) );
    }
 
+   public static function fromBytes(bytes:haxe.io.Bytes, inReadOnly:Bool = true) : File
+   {
+      return new File( fileFromBytes(bytes) );
+   }
+
    public static function create(inFilename:String, inAllowOverwite:Bool = true) : File
    {
       return new File( fileCreate(inFilename, inAllowOverwite) );
@@ -25,5 +30,6 @@ class File extends Group
    static var fileClose = Loader.load("fileClose","ov");
    static var fileOpen = Loader.load("fileOpen","sbo");
    static var fileCreate = Loader.load("fileCreate","sbo");
+   static var fileFromBytes = Loader.load("fileFromBytes","oo");
 }
 

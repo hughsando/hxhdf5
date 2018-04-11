@@ -181,6 +181,56 @@ value fileCreate(HxString inFilename, bool inAllowOverwrite)
 DEFINE_PRIME2(fileCreate)
 
 
+value fileFromBytes(value inBytes)
+{
+   CheckError();
+
+   CffiBytes buf = getByteData(inBytes);
+   if (!buf.data)
+      val_throw( alloc_string("Invalid byte data") );
+
+   hid_t   fapl, file_id;
+
+   /* Create FAPL to transmit file image */
+   if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) 
+      val_throw( alloc_string("Bad H5Pcreate") );
+
+   int alloc_incr = 65536;
+
+   /* Configure FAPL to use the core file driver */
+   if (H5Pset_fapl_core(fapl, alloc_incr, FALSE) < 0) 
+      val_throw( alloc_string("Bad H5Pset_fapl_core") );
+
+   /* Assign file image in user buffer to FAPL */
+   if (H5Pset_file_image(fapl, buf.data, buf.length) < 0) 
+      val_throw( alloc_string("Bad H5Pset_file_image") );
+
+   /* set file open flags */  
+   int file_open_flags = H5F_ACC_RDONLY;
+
+    /* define a unique file name */
+   static int file_name_counter = 0;
+   char file_name[1024];
+   sprintf(file_name,"file_%d", file_name_counter++);
+
+   /* Assign file image in FAPL to the core file driver */ 
+   if ((file_id = H5Fopen(file_name, file_open_flags, fapl)) < 0) 
+      val_throw( alloc_string("Bad H5Fopen") );
+
+   /* Close FAPL */
+   H5Pclose(fapl);
+
+   /* Return file identifier */ 
+   return idToVal(file_id, fileKind, destroyFile);
+}
+DEFINE_PRIME1(fileFromBytes)
+
+
+
+
+
+
+
 void fileClose(value inFile)
 {
    TO_FILE
