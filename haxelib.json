@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ "cpp", "haxe", "hdf5" ],
   "description": "Haxe build files for hdf5 library",
-  "version": "0.1.0",
-  "releasenote": "Creation",
+  "version": "0.2.0",
+  "releasenote": "Load/Save from byte buffers",
   "contributors": [ "gamehaxe" ],
   "dependencies": {}
 }
