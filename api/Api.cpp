@@ -350,7 +350,7 @@ herr_t h5GetAttrs(hid_t location_id, const char *attr_name, const H5A_info_t *ai
             case H5T_INTEGER:
                {
                int value = 0;
-               H5Aread(attr, p_type, &value);
+               H5Aread(attr, H5T_NATIVE_INT, &value);
                alloc_field(result, val_id(attr_name), alloc_int(value) );
                }
                break;
@@ -363,16 +363,46 @@ herr_t h5GetAttrs(hid_t location_id, const char *attr_name, const H5A_info_t *ai
                break;
             case H5T_STRING:
                {
-               char *ptr = 0;
-               H5Aread(attr, p_type, &ptr);
-               alloc_field(result, val_id(attr_name), alloc_string(ptr) );
+               bool isVarStr =  H5Tis_variable_str(type);
+               if (isVarStr)
+               {
+                  char *ptr = 0;
+                  H5Aread(attr, p_type, &ptr);
+                  alloc_field(result, val_id(attr_name), alloc_string(ptr) );
+               }
+               else
+               {
+                  std::vector<char> buffer(alloc_size +1);
+
+                  H5Aread(attr, type, &buffer[0]);
+                  value result = 0;
+                  if (nelmts>1)
+                  {
+                     hsize_t tsize = H5Tget_size(type);
+
+                     value array = alloc_array(nelmts);
+                     for(int i=0;i<nelmts;i++)
+                     {
+                        const char *p = &buffer[i*tsize];
+                        if (p[tsize-1])
+                           val_array_set_i(array, i, alloc_string_len(p, tsize));
+                        else
+                           val_array_set_i(array, i, alloc_string(p));
+                     }
+
+                     result = array;
+                  }
+                  else
+                  {
+                     result = alloc_string(&buffer[0]);
+                  }
+                  alloc_field(result, val_id(attr_name), result);
+               }
                }
                break;
-            /*
             case H5T_TIME:
-               printf("  ->time\n");
+               //printf("  ->time\n");
                break;
-            */
             default:
                //printf("  ->unknown\n");
                break;

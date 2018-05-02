@@ -54,7 +54,7 @@ class Build
 
    public static function hdf5Build()
    {
-      command("haxelib", ["run","hxcpp","Hdf5.xml" ] );
+      command("haxelib", ["run","hxcpp","Hdf5.xml" ].concat(debugFlag) );
    }
 
 
