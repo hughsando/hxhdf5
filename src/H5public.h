@@ -166,7 +166,7 @@ typedef int ssize_t;
 typedef long ssize_t;
 #       define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG
 #elif H5_SIZEOF_SIZE_T==H5_SIZEOF_LONG_LONG
-  #ifndef HX_LINUX
+  #if !defined(HX_LINUX) && !defined(__APPLE__)
   typedef long long ssize_t;
   #endif
 #       define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG_LONG
